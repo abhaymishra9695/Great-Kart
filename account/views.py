@@ -11,6 +11,8 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage, get_connection
+from carts.views import _cart_id
+from carts.models import *
 # from django.contrib.auth import get_user_model
 # Account=get_user_model()
 # Create your views here.
@@ -56,11 +58,22 @@ def login(request):
     if request.method=="POST":
         email=request.POST["email"]
         password=request.POST["password"]
-        
+       
         
         user=auth.authenticate(email=email,password=password)
 
         if user is not None:
+            try:
+                cart = Cart.objects.get(cart_id=_cart_id(request))
+                is_cart_item_exists=CartItem.objects.filter(cart=cart).exists()
+                print(is_cart_item_exists)
+                if is_cart_item_exists:
+                    cart_item=CartItem.objects.filter(cart=cart)
+                    for item in cart_item:
+                        item.user=user 
+                        item.save()
+            except Cart.DoesNotExist:
+                pass
             auth.login(request,user)  
             messages.success(request, "You are Logedin successfully")
             return redirect('dashboard')
