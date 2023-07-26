@@ -13,6 +13,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage, get_connection
 from carts.views import _cart_id
 from carts.models import *
+import requests
 # from django.contrib.auth import get_user_model
 # Account=get_user_model()
 # Create your views here.
@@ -43,7 +44,7 @@ def register(request):
             })
             to_email=email
             send_email=EmailMessage(mail_subject,message,to=[to_email])
-            send_email.send()
+            # send_email.send()
             # messages.error(self.request, 'Password does not match', extra_tags='danger')
             return redirect('/account/login/?command=verification&email='+email)
             
@@ -66,7 +67,6 @@ def login(request):
             try:
                 cart = Cart.objects.get(cart_id=_cart_id(request))
                 is_cart_item_exists=CartItem.objects.filter(cart=cart).exists()
-                print(is_cart_item_exists)
                 if is_cart_item_exists:
                     cart_item=CartItem.objects.filter(cart=cart)
                     for item in cart_item:
@@ -75,8 +75,19 @@ def login(request):
             except Cart.DoesNotExist:
                 pass
             auth.login(request,user)  
-            messages.success(request, "You are Logedin successfully")
-            return redirect('dashboard')
+            url=request.META.get('HTTP_REFERER')
+            
+            try:
+                query=requests.utils.urlparse(url).query
+                print("query->",query)
+                # next=/cart/chechout/
+                params=dict(x.split('=') for x in query.split('&'))
+                if 'next' in params:
+                    nextpage=params['next']
+                    return redirect(nextpage)
+            except:
+                messages.success(request, "You are Logged in successfully")
+                return redirect('dashboard')
         else:
             messages.error(request, 'email or password not match', extra_tags='danger')
             return redirect('login')
@@ -125,7 +136,7 @@ def forgetpassword(request):
             })
             to_email=email
             send_email=EmailMessage(mail_subject,message,to=[to_email])
-            send_email.send()
+            # send_email.send()
             messages.success(request, "Password reset email has been sent to your this "+email+" email address")
             # messages.error(self.request, 'Password does not match', extra_tags='danger')
             return redirect('login')
