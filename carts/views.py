@@ -3,7 +3,7 @@ from store.models import Product
 from .models import *
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
-
+from orders.forms import *
 
 def _cart_id(request):
     cart=request.session.session_key
@@ -119,13 +119,14 @@ def checkout(request, total=0, quantity=0, cart_items=None):
         grand_total = total + tax
     except ObjectDoesNotExist:
         pass
-    
+    form=OrderForm()  
     context = {
         'total': total,
         'quantity': quantity,
         'cart_items': cart_items,
         'tax': tax,
-        'grand_total': grand_total
+        'grand_total': grand_total,
+        'form':form
     }
     
     return render(request, "store/checkout.html",context)   

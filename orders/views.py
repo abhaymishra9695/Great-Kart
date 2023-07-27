@@ -6,6 +6,10 @@ from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from carts.models import *
 import datetime
+
+def payments(request):
+    return render(request, 'order/payments.html')
+
 def place_order(request,total=0,quantity=0):
     current_user=request.user 
     # if cart count is less than or equal to 0 then redirect back to shop
@@ -21,7 +25,7 @@ def place_order(request,total=0,quantity=0):
     tax=(2*total)/100
     grand_total=total+tax
     if request.method=='POST':
-        form=OrderForm(request.POST)
+        form=OrderForm(request.POST)        
         if form.is_valid():
             # store all the billing information inside order table
             data=Order()
@@ -49,7 +53,15 @@ def place_order(request,total=0,quantity=0):
             order_number=current_date+str(data.id)
             data.order_number=order_number
             data.save()
-            return redirect('checkout') 
+            order=Order.objects.get(user=current_user,is_ordered=False,order_number=order_number)
+            context={
+                'order':order,
+                'cart_items':cart_items,
+                'total':total,
+                'tax':tax,
+                'grant_total':grand_total
+            }
+            return render(request, 'order/payments.html',context) 
         else:
                
             return render(request, 'store/checkout.html', {'form': form})
