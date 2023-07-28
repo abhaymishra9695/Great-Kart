@@ -111,7 +111,33 @@
     </div> <!-- container .//  -->
     </section>
     <script>
-       var amount={{ grand_total }}
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }   
+
+
+       var amount="{{ grand_total }}"
+       var url="{% url 'payments' %}"
+       var csrftoken=getCookie('csrftoken');
+       var orderID="{{ order.order_number }}"
+       var payment_method="PayPal"
+      console.log(amount)
+      console.log(url)
+      console.log(csrftoken)
+      console.log(orderID)
+      console.log(payment_method)
         // Render the PayPal button into #paypal-button-container
         paypal.Buttons({
             style: {
@@ -137,8 +163,26 @@
             onApprove: function(data, actions) {
                 return actions.order.capture().then(function(details){
                     console.log(details)
-                    alert('Transaction completed by' + details.payer.name.given_name + '!');
-                })
+                    sendDate();
+                    function sendDate(){
+                        fetch(url,{
+                            method:"POST",
+                            headers:{
+                                "content-type":"application/json",
+                                "x-CSRFToken":csrftoken,
+                            },
+                            body:JSON.stringify({
+                                orderID:orderID,
+                                transID:details.id,
+                                payment_method:payment_method,
+                                status:details.status
+                            }),
+                        })
+                        // .then(response=>response.json())
+                        // .then(data=>console.log(data));
+                    }
+                    // alert('Transaction completed by' + details.payer.name.given_name + '!');
+                });
             }
             
 

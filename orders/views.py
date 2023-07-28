@@ -6,8 +6,43 @@ from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from carts.models import *
 import datetime
-
+import json
 def payments(request):
+    body=json.loads(request.body)
+    order=Order.objects.get(user=request.user,is_ordered=False,order_number=body['orderID'])
+    #store transaction details inside Payment model
+    payment=Payment(
+        user=request.user,
+        payment_id=body['transID'],
+        payment_method=body['payment_method'],
+        amount_paid=order.order_total,
+        status=body['status'],
+    )
+    payment.save()
+    order.payment=payment
+    order.is_ordered=True
+    order.save()
+    # Move the cart items to Order Product table
+    cartitems=CartItem.objects.filter(user=request.user)
+    print(cartitems)
+    for cartitem in cartitems:
+        orderproduct=OrderProduct()
+        orderproduct.order=order
+        orderproduct.payment=payment
+        orderproduct.user=request.user
+        orderproduct.product=cartitem.product
+        orderproduct.quantity=cartitem.quantity
+        orderproduct.product_price=cartitem.product.price
+        orderproduct.ordered=True
+        orderproduct.save()
+    
+        #Reduce the quentity of the sold product
+        product=Product.objects.get(id=cartitem.product_id)
+        product.stock-=cartitem.quantity
+        product.save()
+    # clear cart
+    CartItem.objects.filter(user=request.user).delete()
+    # Send order recieved email to cutomer 
     return render(request, 'order/payments.html')
 
 def place_order(request,total=0,quantity=0):
