@@ -13,6 +13,8 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage, get_connection
 from carts.views import _cart_id
 from carts.models import *
+from django.core.mail import send_mail
+
 import requests
 # from django.contrib.auth import get_user_model
 # Account=get_user_model()
@@ -33,18 +35,25 @@ def register(request):
             user.save()
             # USER ACTIVATION
             current_site=get_current_site(request)
-            mail_subject='Please activate your account'
-            message=render_to_string('account/account_verification_email.html',
-            {
-                'user':user,
-                'domain':current_site,
-                'uid':urlsafe_base64_encode(force_bytes(user.pk)),
-                'token':default_token_generator.make_token(user),
+            # mail_subject='Please activate your account'
+            # message=render_to_string('account/account_verification_email.html',
+            # {
+            #     'user':user,
+            #     'domain':current_site,
+            #     'uid':urlsafe_base64_encode(force_bytes(user.pk)),
+            #     'token':default_token_generator.make_token(user),
 
-            })
-            to_email=email
-            send_email=EmailMessage(mail_subject,message,to=[to_email])
+            # })
+            # to_email=email
+            # send_email=EmailMessage(mail_subject,message,to=[to_email])
             # send_email.send()
+            send_mail(
+                "Please activate your account",
+                "Here is the message.",
+                "abhaymishraspn77@gmail.com",
+                [email],
+                fail_silently=False,
+            )
             # messages.error(self.request, 'Password does not match', extra_tags='danger')
             return redirect('/account/login/?command=verification&email='+email)
             
