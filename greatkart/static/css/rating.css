@@ -3,18 +3,19 @@
     display: none;
 } */
 
-.rate{
+/* .rate{
     display: inline-block;
     border: 0;
-}
+   
+} */
 
-.rate > label{
+/* .rate > label{
     float: right;
-}
+} */
 
 /* Showing the stars */
  
-.rate > label:before{
+/* .rate > label:before{
     display: inline-block;
     font-size: 1.1rem;
     font-family: FontAwesome;
@@ -22,4 +23,16 @@
     margin: 0;
     padding: 0.3rem .2rem;
     cursor: pointer;
-}  
+}   */
+
+/* half star */
+
+/* .rate .half:before{
+    content: "\f098";
+    position: absolute;
+    padding-right: 0;
+} */
+
+/* input:checked ~ label, label:hover ~ label{
+    color: #ffb503;
+} */

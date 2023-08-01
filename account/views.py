@@ -1,6 +1,6 @@
-from django.shortcuts import render,redirect
-from .forms import RegistrationForm
-from .models import Account
+from django.shortcuts import render,redirect,get_object_or_404
+from .forms import RegistrationForm,UserForm,UserProfileForm
+from .models import Account,UserProfile
 from django.contrib import messages,auth
 from django.contrib.auth.decorators import login_required
 
@@ -14,8 +14,9 @@ from django.core.mail import EmailMessage, get_connection
 from carts.views import _cart_id
 from carts.models import *
 from django.core.mail import send_mail
-
+from orders.models import Order
 import requests
+from django.db.models import Count
 # from django.contrib.auth import get_user_model
 # Account=get_user_model()
 # Create your views here.
@@ -124,7 +125,12 @@ def activate(request,uidb64,token):
         return redirect('register')
 @login_required(login_url='login')
 def dashboard(request):
-    return render(request,'account/dashboard.html')
+    orders=Order.objects.order_by('-created_at').filter(user=request.user,is_ordered=True)
+    order_count=orders.count()
+    context={
+        'order_count':order_count
+    }
+    return render(request,'account/dashboard.html',context)
 
 
 def forgetpassword(request):
@@ -187,3 +193,32 @@ def resetpassword(request):
             return redirect('resetpassword')
     else:          
         return render(request,'account/resetpassword.html')
+    
+def my_order(request):
+    orders=Order.objects.filter(user=request.user,is_ordered=True).order_by('-created_at')
+    context={
+        "orders":orders
+    }
+    return render(request,'account/my_orders.html',context)
+
+def edit_profile(request):
+    userprofile=get_object_or_404(UserProfile,user=request.user)
+    # print("user profile:-",userprofile)
+    if request.method=="POST":
+        user_form=UserForm(request.POST,instance=request.user)
+        profile_forms=UserProfileForm(request.POST,request.FILES,instance=userprofile)
+        print(profile_forms)
+        if user_form.is_valid() and profile_forms.is_valid():
+            user_form.save()
+            profile_forms.save()
+            messages.success(request, "Your profile Updated.")   
+            return redirect('edit_profile')
+    else:
+        user_form=UserForm(instance=request.user)
+        profile_forms=UserProfileForm(instance=userprofile)
+    context={
+        'user_form':user_form,
+        'profile_forms':profile_forms
+    }
+    return render(request,'account/edit_profile.html',context)
+
