@@ -17,6 +17,7 @@ from django.core.mail import send_mail
 from orders.models import Order
 import requests
 from django.db.models import Count
+from orders.models import *
 # from django.contrib.auth import get_user_model
 # Account=get_user_model()
 # Create your views here.
@@ -127,8 +128,10 @@ def activate(request,uidb64,token):
 def dashboard(request):
     orders=Order.objects.order_by('-created_at').filter(user=request.user,is_ordered=True)
     order_count=orders.count()
+    userprofile=UserProfile.objects.get(user_id=request.user.id)
     context={
-        'order_count':order_count
+        'order_count':order_count,
+        'userprofile':userprofile
     }
     return render(request,'account/dashboard.html',context)
 
@@ -243,3 +246,17 @@ def change_password(request):
             messages.error(request, 'Password does not Matched !', extra_tags='danger')
             return redirect('change_password')
     return render(request,'account/change_password.html')  
+
+@login_required(login_url='login')
+def order_detail(request,order_id):
+    order_details=OrderProduct.objects.filter(order__order_number=order_id)
+    order=Order.objects.get(order_number=order_id)
+    subtotal=0
+    for i in order_details:
+        subtotal+=i.product_price*i.quantity
+    context={
+        'order_details':order_details,
+        'order':order,
+        'subtotal':subtotal
+    }
+    return render(request,'account/order_detail.html',context)
