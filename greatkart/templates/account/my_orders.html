@@ -8,19 +8,9 @@
     {% include 'include/alert-massage.html' %}
     <div class="container">
         <div class="row">
-        <aside class="col-md-3">
-            <!--   SIDEBAR   -->
-            <ul class="list-group">
-                <a class="list-group-item {% if '/account/' == request.path %} active {% endif %}" href="{% url 'dashboard' %}">Dashboard</a>
-                <a class="list-group-item {% if '/my-order/' in request.path %} active {% endif %}" href="{% url 'my_order' %}">My Orders</a>
-                <a class="list-group-item" href="#"> Edit Profile </a>
-                <a class="list-group-item" href="#">Change Password </a>
+          <!--   SIDEBAR   -->
+          {% include 'account/dashbord_sidebar.html' %}
 
-            </ul>
-            <br>
-            <a class="btn btn-light btn-block" href="{% url 'logout' %}"> <i class="fa fa-power-off"></i> <span class="text">Log out</span> </a> 
-            <!--   SIDEBAR .//END   -->
-        </aside>
         <main class="col-md-9">
             <article class="card">
             <header class="card-header">
