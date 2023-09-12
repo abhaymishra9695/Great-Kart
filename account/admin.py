@@ -11,12 +11,15 @@ class AcountAdmin(UserAdmin):
     filter_horizontal=()
     list_filter=()
     fieldsets=()
-admin.site.register(Account,AcountAdmin)
+
 
 class UserProfileAdmin(admin.ModelAdmin):
     def thumbnail(self, object):
-        return format_html('<img src="{}" width="30" style="border-radius: 50%;">'.format(object.profile_picture.url))
+        try:
+            return format_html('<img src="{}" width="30" style="border-radius: 50%;">'.format(object.profile_picture.url))
+        except:
+            pass #just ignore
     thumbnail.short_description = 'Profile Picture'
     list_display = ('thumbnail','user', 'city','state', 'country')
-
+admin.site.register(Account,AcountAdmin)
 admin.site.register(UserProfile,UserProfileAdmin)

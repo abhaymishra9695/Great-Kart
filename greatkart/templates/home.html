@@ -4,6 +4,53 @@
 {% block content %}
 <!-- ========================= SECTION MAIN ========================= -->
 {% load static %}
+<style>
+	.rate > input{
+    display: none;
+}
+
+.rate{
+    display: inline-block;
+    border: 0;
+   
+}
+
+.rate > label{
+    float: right;
+}
+
+
+ 
+.rate > label:before{
+    display: inline-block;
+    font-size: 1.1rem;
+    font-family: FontAwesome;
+    content: "\f005";
+    margin: 0;
+    padding: 0.3rem .2rem;
+    cursor: pointer;
+}  
+
+
+
+input:checked ~ label, label:hover ~ label{
+    color: #ffb503;
+}
+
+input:checked + label:hover, input:checked ~ label:hover, input:checked~label:hover~label,label:hover~input:checked~label{
+  color: #cc9000;
+}
+
+.reting-star i{
+  color: #ffb503 !important;
+}
+
+
+
+
+
+
+</style>
 <section class="section-intro padding-y-sm">
 <div class="container">
 
@@ -23,8 +70,6 @@
 	<a href="{% url 'store' %}" class="btn btn-outline-primary float-right">See all</a>
 	<h3 class="section-title">Popular products</h3>
 </header><!-- sect-heading -->
-
-	
 <div class="row">
 	{% for product in products %}
 	<div class="col-md-3">
@@ -33,6 +78,21 @@
 			<figcaption class="info-wrap">
 				<a href="{{ product.get_url }}" class="title">{{ product.product_name }}</a>
 				<div class="price mt-1">${{ product.price }}</div> <!-- price-wrap.// -->
+				<div class="reting-star">
+					<span>
+						<i class="fa fa-star{% if product.averageReview == 0 %}-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if product.averageReview < 1 %}-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if product.averageReview < 2 %}-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if product.averageReview < 3 %}-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if product.averageReview < 4 %}-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if product.averageReview < 5 %}-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if product.averageReview < 6 %}-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if product.averageReview < 7 %}-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if product.averageReview < 8 %}-o {% endif %}" aria-hidden="true"></i>
+						<i class="fa fa-star{% if product.averageReview < 9 %}-o {% endif %}" aria-hidden="true"></i>
+						   
+					  </span>
+				</div>
 			</figcaption>
 		</div>
 	</div> <!-- col.// -->

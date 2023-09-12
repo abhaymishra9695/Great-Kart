@@ -35,28 +35,26 @@ def register(request):
             user=Account.objects.create_user(first_name=first_name,last_name=last_name, username=username ,email=email, password=password)
             user.phone_number=phone_number
             user.save()
+            user_profile = UserProfile.objects.create(user=user)
             # USER ACTIVATION
             current_site=get_current_site(request)
-            # mail_subject='Please activate your account'
-            # message=render_to_string('account/account_verification_email.html',
-            # {
-            #     'user':user,
-            #     'domain':current_site,
-            #     'uid':urlsafe_base64_encode(force_bytes(user.pk)),
-            #     'token':default_token_generator.make_token(user),
+            mail_subject='Please activate your account'
+            message=render_to_string('account/account_verification_email.html',
+            {
+                'user':user,
+                'domain':current_site,
+                'uid':urlsafe_base64_encode(force_bytes(user.pk)),
+                'token':default_token_generator.make_token(user),
 
-            # })
+            })
+            from_email = 'abhaymishraspn77@gmail.com'
+            recipient_list = [email]
+            send_mail(mail_subject, message, from_email, recipient_list, fail_silently=False)
             # to_email=email
             # send_email=EmailMessage(mail_subject,message,to=[to_email])
             # send_email.send()
-            send_mail(
-                "Please activate your account",
-                "Here is the message.",
-                "abhaymishraspn77@gmail.com",
-                [email],
-                fail_silently=False,
-            )
-            # messages.error(self.request, 'Password does not match', extra_tags='danger')
+           
+            messages.error(request, 'Password does not match', extra_tags='danger')
             return redirect('/account/login/?command=verification&email='+email)
             
     form=RegistrationForm()
@@ -128,7 +126,12 @@ def activate(request,uidb64,token):
 def dashboard(request):
     orders=Order.objects.order_by('-created_at').filter(user=request.user,is_ordered=True)
     order_count=orders.count()
-    userprofile=UserProfile.objects.get(user_id=request.user.id)
+    userprofile = None
+    try:
+        userprofile=UserProfile.objects.get(user_id=request.user.id)
+        print(userprofile)
+    except:
+        pass 
     context={
         'order_count':order_count,
         'userprofile':userprofile
@@ -205,7 +208,9 @@ def my_order(request):
     return render(request,'account/my_orders.html',context)
 @login_required(login_url='login')
 def edit_profile(request):
+
     userprofile=get_object_or_404(UserProfile,user=request.user)
+ 
     # print("user profile:-",userprofile)
     if request.method=="POST":
         user_form=UserForm(request.POST,instance=request.user)
