@@ -25,13 +25,18 @@ from orders.models import *
 def register(request):
     if request.method=="POST":
         form=RegistrationForm(request.POST)
+        email=request.POST["email"]
+        print(email)
         if form.is_valid():
             first_name=form.cleaned_data["first_name"]
             last_name=form.cleaned_data["last_name"]
             email=form.cleaned_data["email"]
+            
             phone_number=form.cleaned_data["phone_number"]
             password=form.cleaned_data["password"]
             username=email.split('@')[0]
+            # user=Account.objects.filter(email=email)
+            
             user=Account.objects.create_user(first_name=first_name,last_name=last_name, username=username ,email=email, password=password)
             user.phone_number=phone_number
             user.save()
@@ -47,7 +52,8 @@ def register(request):
                 'token':default_token_generator.make_token(user),
 
             })
-            from_email = 'abhaymishraspn77@gmail.com'
+            # from_email = 'abhaymishraspn77@gmail.com'
+            from_email = 'Great Kart'
             recipient_list = [email]
             send_mail(mail_subject, message, from_email, recipient_list, fail_silently=False)
             # to_email=email
